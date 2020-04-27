@@ -214,7 +214,6 @@ public class MainActivity extends WebViewExtActivity implements
                 //Snackbar.make(view, "All clear.", Snackbar.LENGTH_SHORT).show();
             }
         });
-
         // Make sure prefs are set before loading them
         PreferenceManager.setDefaultValues(this, R.xml.settings, false);
 
@@ -441,13 +440,11 @@ public class MainActivity extends WebViewExtActivity implements
                         startActivity(new Intent(this, SettingsActivity.class));
                         break;
                     case R.id.desktop_mode:
-                        try {
-                            // clearing app data
-                            Runtime runtime = Runtime.getRuntime();
-                            runtime.exec("pm clear org.lineageos.jelly");
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
+                        mWebView.setDesktopMode(!isDesktop);
+                        desktopMode.setTitle(getString(isDesktop ?
+                                R.string.menu_desktop_mode : R.string.menu_mobile_mode));
+                        desktopMode.setIcon(ContextCompat.getDrawable(this, isDesktop ?
+                                R.drawable.ic_desktop : R.drawable.ic_mobile));
                         break;
                 }
                 return true;
@@ -653,7 +650,6 @@ public class MainActivity extends WebViewExtActivity implements
         Window window = getWindow();
         window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
         window.setStatusBarColor(color);
-//        window.setNavigationBarColor(color);
         }
 
         int progressColor = hasValidColor
@@ -662,11 +658,23 @@ public class MainActivity extends WebViewExtActivity implements
         mLoadingProgress.setProgressTintList(ColorStateList.valueOf(progressColor));
         mLoadingProgress.postInvalidate();
 
-        boolean isReachMode = UiUtils.isReachModeEnabled(this);
-
+        boolean isReachMode = false;
+        if (isReachMode) {
+            getWindow().setNavigationBarColor(color);
+        } else {
+            getWindow().setStatusBarColor(color);
+        }
 
         int flags = getWindow().getDecorView().getSystemUiVisibility();
-
+        if (UiUtils.isColorLight(color)) {
+            flags |= isReachMode ?
+                    View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR :
+                    View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
+        } else {
+            flags &= isReachMode ?
+                    ~View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR :
+                    ~View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
+        }
         getWindow().getDecorView().setSystemUiVisibility(flags);
 
         setTaskDescription(new ActivityManager.TaskDescription(mWebView.getTitle(),
@@ -735,7 +743,7 @@ public class MainActivity extends WebViewExtActivity implements
             launcherIcon = Icon.createWithBitmap(
                     UiUtils.getShortcutIcon(mUrlIcon, getThemeColorWithFallback()));
         } else {
-            launcherIcon = Icon.createWithResource(this, R.mipmap.ic_launcher);
+            launcherIcon = Icon.createWithResource(this, R.drawable.ic_launcher);
         }
 
         String title = mWebView.getTitle();
@@ -745,7 +753,6 @@ public class MainActivity extends WebViewExtActivity implements
                 .setIntent(intent)
                 .build();
 
-        getSystemService(ShortcutManager.class).requestPinShortcut(shortcutInfo, null);
     }
 
     private void setImmersiveMode(boolean enable) {
@@ -790,6 +797,7 @@ public class MainActivity extends WebViewExtActivity implements
         // Now you don't see it
         mCoordinator.setAlpha(0f);
         // Magic happens
+        changeUiMode(UiUtils.isReachModeEnabled(this));
         // Now you see it
         mCoordinator.setAlpha(1f);
     }
@@ -808,13 +816,6 @@ public class MainActivity extends WebViewExtActivity implements
                 android.R.attr.actionBarSize);
 
         if (isReachMode) {
-            appBarParams.gravity = Gravity.BOTTOM;
-            containerParams.setMargins(0, 0, 0, margin);
-            progressParams.removeRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
-            progressParams.addRule(RelativeLayout.ALIGN_PARENT_TOP, RelativeLayout.TRUE);
-            searchBarParams.removeRule(RelativeLayout.ABOVE);
-            searchBarParams.addRule(RelativeLayout.BELOW, R.id.load_progress);
-        } else {
             appBarParams.gravity = Gravity.TOP;
             containerParams.setMargins(0, margin, 0, 0);
             progressParams.removeRule(RelativeLayout.ALIGN_PARENT_TOP);

@@ -45,6 +45,8 @@ import androidx.annotation.NonNull;
 import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
+
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
@@ -197,6 +199,20 @@ public class MainActivity extends WebViewExtActivity implements
 
             autoCompleteTextView.clearFocus();
             mWebView.loadUrl(url);
+        });
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.floatingActionButton);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                try {
+                    // clearing app data
+                    Runtime runtime = Runtime.getRuntime();
+                    runtime.exec("pm clear org.lineageos.jelly");
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                //Snackbar.make(view, "All clear.", Snackbar.LENGTH_SHORT).show();
+            }
         });
 
         // Make sure prefs are set before loading them

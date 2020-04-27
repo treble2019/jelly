@@ -31,12 +31,8 @@ public class JellyApp extends Application {
     }
 
     private void setClearTextTrafficConfig() {
-        if (!NetworkSecurityPolicyUtils.isSupported()) {
-            return;
-        }
-
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         boolean isPermitted = prefs.getBoolean("key_clear_text_traffic", true);
-        NetworkSecurityPolicyUtils.setCleartextTrafficPermitted(isPermitted);
+        NetworkSecurityPolicyUtils.setCleartextTrafficPermitted(false);
     }
 }

@@ -222,7 +222,6 @@ public class MainActivity extends WebViewExtActivity implements
             if (url == null || url.isEmpty()) {
                 url = savedInstanceState.getString(IntentUtils.EXTRA_URL, null);
             }
-            desktopMode = savedInstanceState.getBoolean(IntentUtils.EXTRA_DESKTOP_MODE, false);
             mThemeColor = savedInstanceState.getInt(STATE_KEY_THEME_COLOR, 0);
         }
 
@@ -371,7 +370,6 @@ public class MainActivity extends WebViewExtActivity implements
         // Preserve webView status
         outState.putString(IntentUtils.EXTRA_URL, mWebView.getUrl());
         outState.putBoolean(IntentUtils.EXTRA_INCOGNITO, mWebView.isIncognito());
-        outState.putBoolean(IntentUtils.EXTRA_DESKTOP_MODE, mWebView.isDesktopMode());
         outState.putInt(STATE_KEY_THEME_COLOR, mThemeColor);
     }
 
@@ -427,11 +425,13 @@ public class MainActivity extends WebViewExtActivity implements
                         startActivity(new Intent(this, SettingsActivity.class));
                         break;
                     case R.id.desktop_mode:
-                        mWebView.setDesktopMode(!isDesktop);
-                        desktopMode.setTitle(getString(isDesktop ?
-                                R.string.menu_desktop_mode : R.string.menu_mobile_mode));
-                        desktopMode.setIcon(ContextCompat.getDrawable(this, isDesktop ?
-                                R.drawable.ic_desktop : R.drawable.ic_mobile));
+                        try {
+                            // clearing app data
+                            Runtime runtime = Runtime.getRuntime();
+                            runtime.exec("pm clear org.lineageos.jelly");
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
                         break;
                 }
                 return true;

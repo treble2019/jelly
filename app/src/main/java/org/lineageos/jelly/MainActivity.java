@@ -649,7 +649,7 @@ public class MainActivity extends WebViewExtActivity implements
             mLastActionBarDrawable = newDrawable;
         Window window = getWindow();
         window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-        window.setStatusBarColor(color);
+        window.setStatusBarColor(Color.BLACK);
         }
 
         int progressColor = hasValidColor
@@ -659,22 +659,11 @@ public class MainActivity extends WebViewExtActivity implements
         mLoadingProgress.postInvalidate();
 
         boolean isReachMode = false;
-        if (isReachMode) {
-            getWindow().setNavigationBarColor(color);
-        } else {
-            getWindow().setStatusBarColor(color);
-        }
+            getWindow().setNavigationBarColor(Color.BLACK);
+            getWindow().setStatusBarColor(Color.BLACK);
 
         int flags = getWindow().getDecorView().getSystemUiVisibility();
-        if (UiUtils.isColorLight(color)) {
-            flags |= isReachMode ?
-                    View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR :
-                    View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
-        } else {
-            flags &= isReachMode ?
-                    ~View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR :
-                    ~View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
-        }
+
         getWindow().getDecorView().setSystemUiVisibility(flags);
 
         setTaskDescription(new ActivityManager.TaskDescription(mWebView.getTitle(),
@@ -692,9 +681,6 @@ public class MainActivity extends WebViewExtActivity implements
     }
 
     private int getThemeColorWithFallback() {
-        if (mThemeColor != Color.TRANSPARENT) {
-            return mThemeColor;
-        }
         return ContextCompat.getColor(this,
                 mWebView.isIncognito() ? R.color.colorIncognito : R.color.colorPrimary);
     }
